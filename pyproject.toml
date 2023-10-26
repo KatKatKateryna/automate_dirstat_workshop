@@ -8,7 +8,7 @@ packages = [{include = "src/speckle_automate_py"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-specklepy = "^2.17.6"
+specklepy = "2.17.9"
 matplotlib = "^3.8.0"
 seaborn = "^0.13.0"
 reportlab = "^4.0.6"
