@@ -330,3 +330,9 @@ def density_summary(
     ]
 
     return data, all_densities, all_areas
+
+
+def createColoredMeshes(
+    automate_context: AutomationContext, health_objects: Dict[str, HealthObject]
+) -> Base:
+    return Base()

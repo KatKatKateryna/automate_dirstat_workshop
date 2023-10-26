@@ -14,6 +14,7 @@ from Objects.objects import (
     attach_visual_markers,
     colorise_densities,
     create_health_objects,
+    createColoredMeshes,
     density_summary,
 )
 from Utilities.reporting import Report
@@ -84,11 +85,11 @@ def automate_function(
     )
 
     colorise_densities(automate_context, health_objects)
+    colored_meshes = createColoredMeshes(automate_context, health_objects)
 
     # Wrap up the analysis by marking the run either successful or failed.
     pass_rate_percentage = function_inputs.max_percentage_high_density_objects
     threshold = function_inputs.density_level
-    data, all_densities, all_areas = density_summary(health_objects)
 
     commit_details = {
         "stream_id": automate_context.automation_run_data.project_id,
@@ -100,20 +101,26 @@ def automate_function(
         threshold, pass_rate_percentage, health_objects, commit_details
     )
 
+    high_density_count = summary_data["values"]["fail_count"]
+    total_displayable_count = len(displayable_bases)
+
+    ################## generate report
+    data, all_densities, all_areas = density_summary(health_objects)
     report_data = {
         "table_data": summary_data["table"],
         "result": summary_data["values"]["result"],
     }
-
-    high_density_count = summary_data["values"]["fail_count"]
-    total_displayable_count = len(displayable_bases)
-
     report = Report.generate_pdf(
         all_densities, [float(a) for a in all_areas], data, threshold, report_data
     )
-
     file_name = Report.write_pdf_to_temp(report)
     automate_context.store_file_result(file_name)
+    ##################
+
+    automate_context.create_new_version_in_project(
+        colored_meshes,
+        automate_context.automation_run_data.branch_name + "_automate_mesh_check",
+    )
 
     if summary_data["values"]["result"] == "Fail":
         automate_context.mark_run_failed(
